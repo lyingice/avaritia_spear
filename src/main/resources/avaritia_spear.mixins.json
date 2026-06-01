@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "net.avaritia.avaritiaspear.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "SpearAttackHandlerInfinityMixin",
+    "SpearCollisionInfinityMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8.4"
+}

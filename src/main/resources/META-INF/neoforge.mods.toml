@@ -1,0 +1,51 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT license"
+
+[[mods]]
+modId="avaritia_spear"
+version="1.0.0"
+displayName="Avaritia:Spear"
+displayURL="https://mcreator.net"
+credits="114514"
+authors="lying_ice"
+
+# Start of user code block mod configuration
+# End of user code block mod configuration
+
+[[mixins]]
+    config = "avaritia_spear.mixins.json"
+
+# Start of user code block custom mixins
+# End of user code block custom mixins
+
+[[dependencies.avaritia_spear]]
+    modId="neoforge"
+    type="required"
+    versionRange="[21.1.190,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.avaritia_spear]]
+    modId="minecraft"
+    type="required"
+    versionRange="[1.21.1]"
+    ordering="AFTER"
+    side="BOTH"
+
+
+
+
+
+# Start of user code block dependencies configuration
+[[dependencies.avaritia_spear]]
+modId = "spearcore"
+mandatory = true
+versionRange = "[1.0.0,)"
+ordering = "BEFORE"
+[[dependencies.avaritia_spear]]
+modId = "avaritia"
+mandatory = true
+versionRange = "[1.0.0,)"
+ordering = "AFTER"
+# End of user code block dependencies configuration
