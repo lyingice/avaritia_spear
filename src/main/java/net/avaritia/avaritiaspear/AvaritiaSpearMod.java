@@ -1,9 +1,16 @@
 package net.avaritia.avaritiaspear;
 
+
 import net.avaritia.avaritiaspear.init.AvaritiaSpearModItems;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.network.handling.IPayloadHandler;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -26,12 +33,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.core.registries.BuiltInRegistries;
 
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.Queue;
-import java.util.PriorityQueue;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Comparator;
 
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;

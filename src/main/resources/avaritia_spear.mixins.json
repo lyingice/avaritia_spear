@@ -7,6 +7,8 @@
     "SpearCollisionInfinityMixin"
   ],
   "client": [
+    "CosmicBakeModelDisplayMixin",
+    "ItemRendererCosmicMixin"
   ],
   "injectors": {
     "defaultRequire": 1

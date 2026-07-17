@@ -4,7 +4,7 @@ license="MIT license"
 
 [[mods]]
 modId="avaritia_spear"
-version="1.0.0"
+version="1.1.0"
 displayName="Avaritia:Spear"
 displayURL="https://mcreator.net"
 credits="114514"
@@ -41,7 +41,7 @@ authors="lying_ice"
 [[dependencies.avaritia_spear]]
 modId = "spearcore"
 mandatory = true
-versionRange = "[1.0.0,)"
+versionRange = "[2.0.0,)"
 ordering = "BEFORE"
 [[dependencies.avaritia_spear]]
 modId = "avaritia"

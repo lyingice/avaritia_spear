@@ -1,7 +1,6 @@
 package net.avaritia.avaritiaspear.mixin;
 
 import net.avaritia.avaritiaspear.item.InfinitySpearItem;
-import net.minecraft.spearcore.util.SpearCollision;
 import net.minecraft.spearcore.item.SpearItem;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,7 +17,7 @@ import committee.nova.mods.avaritia.init.registry.ModToolTiers;
 import java.util.List;
 import java.util.function.Predicate;
 
-@Mixin(SpearCollision.class)
+@Mixin(SpearItem.class)
 public class SpearCollisionInfinityMixin {
 
     @Inject(method = "getHitEntitiesAlong(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/spearcore/item/SpearItem;FLjava/util/function/Predicate;)Ljava/util/List;",

@@ -1,7 +1,7 @@
 package net.avaritia.avaritiaspear.mixin;
 
 import net.avaritia.avaritiaspear.item.InfinitySpearItem;
-import net.minecraft.spearcore.client.SpearAttackHandler;
+import net.minecraft.spearcore.event.SpearAttackHandler;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;

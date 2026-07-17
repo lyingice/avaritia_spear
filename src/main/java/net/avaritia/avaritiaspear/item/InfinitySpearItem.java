@@ -38,6 +38,12 @@ public class InfinitySpearItem extends SpearItem implements IUndamageable, InitE
     private static final SoundEvent SPEAR_USE = SpearSounds.ITEM_SPEAR_USE.get();
     private static final SoundEvent SPEAR_HIT = SpearSounds.ITEM_SPEAR_HIT.get();
     private static final SoundEvent SPEAR_ATTACK = SpearSounds.ITEM_SPEAR_ATTACK.get();
+    @Override public float getMinCreativeRange() { return 2.0f; }
+    @Override public float getMaxCreativeRange() { return 6.5f; }
+    @Override public float getMobFactor() { return 0.5f; }
+    @Override public boolean dealsKnockback() { return true; }
+    @Override public boolean dismounts() { return false; }
+
 
     public InfinitySpearItem() {
         super(new Properties()
@@ -68,7 +74,7 @@ public class InfinitySpearItem extends SpearItem implements IUndamageable, InitE
     }
 
     @Override public float getAttackDuration() { return 0f; }
-    @Override public float getDamageMultiplier() { return 1.2f; }
+    @Override public float getDamageMultiplier() { return 300.f; }
     @Override public SoundEvent getUseSound() { return SPEAR_USE; }
     @Override public SoundEvent getHitSound() { return SPEAR_HIT; }
     @Override public SoundEvent getAttackSound() { return SPEAR_ATTACK; }
