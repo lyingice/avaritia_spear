@@ -1,0 +1,5 @@
+/give @a avaritia_spear:infinity_spear
+/enchant @a spearcore:lunge
+/enchant @a spearcore:lunge 3
+/enchant @a minecraft:looting 10
+/enchant @a minecraft:looting 3

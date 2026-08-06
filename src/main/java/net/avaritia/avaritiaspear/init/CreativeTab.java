@@ -26,6 +26,16 @@ public class CreativeTab {
                     AvaritiaSpearModItems.INFINITY_SPEAR.get().getDefaultInstance(),
                     CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
             );
+            event.insertAfter(
+                    new ItemStack(ModItems.blaze_sword.get()),
+                    AvaritiaSpearModItems.BLAZE_SPEAR.get().getDefaultInstance(),
+                    CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+            );
+            event.insertAfter(
+                    new ItemStack(ModItems.crystal_sword.get()),
+                    AvaritiaSpearModItems.CRYSTAL_SPEAR.get().getDefaultInstance(),
+                    CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+            );
         }
     }
 }

@@ -2,5 +2,9 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "avaritia_spear:item/infinity_spear"
+  },
+  "loader": "avaritia:cosmic",
+  "cosmic": {
+    "mask": "avaritia_spear:mask/item/infinity_spear_0"
   }
 }

@@ -1,0 +1,7 @@
+[
+  {"version":1},
+  {"ingredient":{"id":"avaritia_spear:blaze_spear"},"type":"item_stack","bookmarkType":"INGREDIENT"},
+  {"ingredient":{"id":"avaritia_spear:crystal_spear"},"type":"item_stack","bookmarkType":"INGREDIENT"},
+  {"ingredient":{"id":"avaritia_spear:infinity_spear"},"type":"item_stack","bookmarkType":"INGREDIENT"},
+  {"ingredient":{"id":"avaritia:infinity_elytra"},"type":"item_stack","bookmarkType":"INGREDIENT"}
+]

@@ -1,6 +1,14 @@
 {
   "item.avaritia_spear.infinity_spear": "星辰贯穿之矛",
   "tooltip.avaritia_spear.infinity_spear_damage.desc": "+ 无限 额外攻击伤害",
-  "tooltip.avaritia_spear.infinity_spear.desc": "星辉所向，寰宇尽穿。"
-
+  "tooltip.avaritia_spear.infinity_spear.desc": "星辉所向，寰宇尽穿。",
+  "item.avaritia_spear.blaze_spear": "炽烬之穿骸矛",
+  "tooltip.avaritia_spear.blaze_spear.desc": "刺枯骸躯壳，烬焚尽残形。",
+  "item.avaritia_spear.crystal_spear": "双锋破界之矛",
+  "tooltip.avaritia_spear.crystal_spear.desc": "寒芒所向，破界无拘；矛锋所贯，众敌难栖。",
+  "tooltip.avaritia.tool.lunge": "突进",
+  "tooltip.avaritia.tool.crystal_shatter": "晶爆",
+  "tooltip.avaritia.crystal_shatter.active": "晶爆模式已激活",
+  "tooltip.avaritia.tool.blaze_spear_blast": "炎爆",
+  "tooltip.avaritia.blaze_spear_blast.active": "炎爆模式已激活"
 }

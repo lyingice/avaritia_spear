@@ -1,5 +1,14 @@
 {
   "item.avaritia_spear.infinity_spear": "Stellar Piercing Spear",
   "tooltip.avaritia_spear.infinity_spear_damage.desc": "+ Infinity Extra Damage",
-  "tooltip.avaritia_spear.infinity_spear.desc": "Where starlight pierces, the cosmos yields."
+  "tooltip.avaritia_spear.infinity_spear.desc": "Where starlight pierces, the cosmos yields.",
+  "item.avaritia_spear.blaze_spear": "Emberbone Piercing Spear",
+  "tooltip.avaritia_spear.blaze_spear.desc": "Pierce skeletal husks, incinerate all remnants.",
+  "item.avaritia_spear.crystal_spear": "Dualedge Realmbreaker Spear",
+  "tooltip.avaritia_spear.crystal_spear.desc": "Cold light strides past every bound; Spear thrust impales every foe.",
+  "tooltip.avaritia.tool.lunge": "Lunge",
+  "tooltip.avaritia.tool.crystal_shatter": "Crystal Shatter",
+  "tooltip.avaritia.crystal_shatter.active": "Crystal Shatter Active",
+  "tooltip.avaritia.tool.blaze_spear_blast": "Blast",
+  "tooltip.avaritia.blaze_spear_blast.active": "Blast Mode Active"
 }
