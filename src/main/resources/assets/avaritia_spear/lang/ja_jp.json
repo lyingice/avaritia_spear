@@ -1,0 +1,14 @@
+{
+  "item.avaritia_spear.infinity_spear": "星を穿つ槍",
+  "tooltip.avaritia_spear.infinity_spear_damage.desc": "+ インフィニティ追加ダメージ",
+  "tooltip.avaritia_spear.infinity_spear.desc": "星光が宙を穿ち、宇宙を突き抜ける",
+  "item.avaritia_spear.blaze_spear": "燼骨を貫く槍",
+  "tooltip.avaritia_spear.blaze_spear.desc": "骸を貫き、全てを焼き尽くす",
+  "item.avaritia_spear.crystal_spear": "二刃の次元壊しの槍",
+  "tooltip.avaritia_spear.crystal_spear.desc": "冷厳なる光はあらゆる境界を越え、突き放たれた槍は万敵を貫く",
+  "tooltip.avaritia.tool.lunge": "突進",
+  "tooltip.avaritia.tool.crystal_shatter": "クリスタルシャッター",
+  "tooltip.avaritia.crystal_shatter.active": "クリスタルシャッター有効",
+  "tooltip.avaritia.tool.blaze_spear_blast": "ブラスト",
+  "tooltip.avaritia.blaze_spear_blast.active": "ブラストモード有効"
+}
