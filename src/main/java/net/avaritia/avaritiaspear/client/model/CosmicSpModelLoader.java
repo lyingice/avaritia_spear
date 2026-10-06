@@ -13,9 +13,9 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -49,12 +49,15 @@ public class CosmicSpModelLoader implements IGeometryLoader<CosmicSpModelLoader.
             maskModel.resolveParents(modelGetter);
         }
 
+        // 1.20.1 的 bake 比 1.21 多一个 ResourceLocation（模型位置）参数，
+        // BlockModel.bake 也相应多一个位置参数。
         @Override
         public @NotNull BakedModel bake(@NotNull IGeometryBakingContext context, @NotNull ModelBaker baker,
                                         @NotNull Function<Material, TextureAtlasSprite> spriteGetter,
-                                        @NotNull ModelState modelState, @NotNull ItemOverrides overrides) {
-            BakedModel bakedBase = baseModel.bake(baker, baseModel, spriteGetter, modelState, true);
-            BakedModel bakedMask = maskModel.bake(baker, maskModel, spriteGetter, modelState, true);
+                                        @NotNull ModelState modelState, @NotNull ItemOverrides overrides,
+                                        @NotNull ResourceLocation modelLocation) {
+            BakedModel bakedBase = baseModel.bake(baker, baseModel, spriteGetter, modelState, modelLocation, true);
+            BakedModel bakedMask = maskModel.bake(baker, maskModel, spriteGetter, modelState, modelLocation, true);
             return new CosmicSpBakedModel(bakedBase, bakedMask);
         }
     }

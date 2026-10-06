@@ -113,12 +113,12 @@ public class CosmicSpBakedModel implements BakedModel {
             for (Direction direction : Direction.values()) {
                 List<BakedQuad> quads = pass.getQuads(null, direction, random);
                 if (!quads.isEmpty()) {
-                    return quads.getFirst().getSprite();
+                    return quads.get(0).getSprite();
                 }
             }
             List<BakedQuad> quads = pass.getQuads(null, null, random);
             if (!quads.isEmpty()) {
-                return quads.getFirst().getSprite();
+                return quads.get(0).getSprite();
             }
         }
         return model.getParticleIcon();

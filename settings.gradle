@@ -1,14 +1,15 @@
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
-        maven { url = 'https://maven.neoforged.net/releases' }
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
+        }
     }
 }
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
-}
-rootProject.name = 'avaritia_spear'
 
+rootProject.name = 'avaritia_spear-1.20.1-forge'
+
+// 前置 spearcore 用隔壁的 1.20.1 工程（同一套 official 1.20.1 映射）
 include ':spearcore'
-project(':spearcore').projectDir = file('../spearcore')
+project(':spearcore').projectDir = file('../spearcore-1.20.1')

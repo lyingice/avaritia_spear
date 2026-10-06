@@ -1,8 +1,8 @@
 package net.avaritia.avaritiaspear.item;
 
-import committee.nova.mods.avaritia.api.iface.item.ISwitchable;
-import committee.nova.mods.avaritia.api.iface.item.IUndamageable;
-import committee.nova.mods.avaritia.api.iface.item.InitEnchantItem;
+import net.avaritia.avaritiaspear.api.item.ISwitchable;
+import net.avaritia.avaritiaspear.api.item.IUndamageable;
+import net.avaritia.avaritiaspear.api.item.InitEnchantItem;
 import committee.nova.mods.avaritia.common.entity.ImmortalItemEntity;
 import committee.nova.mods.avaritia.init.config.ModConfig;
 import committee.nova.mods.avaritia.init.registry.ModEntities;
@@ -19,7 +19,11 @@ import net.minecraft.spearcore.init.SpearSounds;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -27,7 +31,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -35,7 +38,7 @@ import net.minecraft.spearcore.item.SpearItem;
 import net.minecraft.spearcore.util.SpearCondition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import committee.nova.mods.avaritia.api.common.enchant.InitEnchantment;
+import net.avaritia.avaritiaspear.api.enchant.InitEnchantment;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,9 +47,9 @@ public class InfinitySpearItem extends SpearItem implements IUndamageable, InitE
     private static final String MODE_LUNGE = "lunge";
     private static final ResourceKey<Enchantment> LUNGE_KEY =
             ResourceKey.create(Registries.ENCHANTMENT,
-                    ResourceLocation.fromNamespaceAndPath("spearcore", "lunge"));
+                    new ResourceLocation("spearcore", "lunge"));
 
-    private final InitEnchantment lootEnchant = new InitEnchantment(Enchantments.LOOTING, 10);
+    private final InitEnchantment lootEnchant = new InitEnchantment(Enchantments.MOB_LOOTING, 10);
     private final InitEnchantment lungeEnchant = new InitEnchantment(LUNGE_KEY, 10);
     private static final SoundEvent SPEAR_USE = SpearSounds.ITEM_SPEAR_USE.get();
     private static final SoundEvent SPEAR_HIT = SpearSounds.ITEM_SPEAR_HIT.get();
@@ -62,28 +65,34 @@ public class InfinitySpearItem extends SpearItem implements IUndamageable, InitE
         super(new Properties()
                 .stacksTo(1)
                 .fireResistant()
-                .rarity(ModRarities.COSMIC.getValue())
+                .rarity(ModRarities.COSMIC)
                 .durability(9999)
         );
     }
+    /** 攻击距离加成的修饰符 ID：1.20.1 用 UUID */
+    private static final java.util.UUID SPEAR_RANGE_ID =
+            java.util.UUID.fromString("6b1f4d0e-2a3b-4c5d-8e9f-0a1b2c3d4e5f");
+
     @Override
-    public ItemAttributeModifiers getDefaultAttributeModifiers(ItemStack stack) {
-        return ItemAttributeModifiers.builder()
-                .add(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(BASE_ATTACK_DAMAGE_ID,
-                                ModToolTiers.INFINITY.getAttackDamageBonus(),
-                                AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(BASE_ATTACK_SPEED_ID,
-                                1.0f / getAttackDuration() - 4.0f,
-                                AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ENTITY_INTERACTION_RANGE,
-                        new AttributeModifier(ResourceLocation.withDefaultNamespace("spear_range"),
-                                7.0, AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .build();
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
+        // 1.20.1 的 super.getDefaultAttributeModifiers 返回的是 ImmutableMultimap，
+        // 直接 put 会抛 UnsupportedOperationException —— 打开创造栏构建搜索树时会走到这里（会崩）。
+        // 必须自己建一个 builder。
+        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+        builder.putAll(super.getDefaultAttributeModifiers(slot));
+        if (slot == EquipmentSlot.MAINHAND) {
+            builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID,
+                    "Weapon modifier", ModToolTiers.INFINITY.getAttackDamageBonus(),
+                    AttributeModifier.Operation.ADDITION));
+            // 注意：getAttackDuration() 被本类覆写为 0f（无冷却），所以这里算出来是 Infinity。
+            // 这是 1.21 原版就有的写法，保持原样；1.20.1 下表现为攻速加成趋近无穷（几乎无攻击间隔）。
+            builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID,
+                    "Weapon modifier", 1.0f / getAttackDuration() - 4.0f,
+                    AttributeModifier.Operation.ADDITION));
+            builder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(SPEAR_RANGE_ID,
+                    "Spear range", 7.0, AttributeModifier.Operation.ADDITION));
+        }
+        return builder.build();
     }
 
 
@@ -132,7 +141,7 @@ public class InfinitySpearItem extends SpearItem implements IUndamageable, InitE
     // ==================== 附魔：Looting 10 常驻，Lunge 10 按模式 ====================
     @Override
     public int getInitEnchantLevel(ItemStack stack, Holder<Enchantment> enchantment) {
-        if (enchantment.is(Enchantments.LOOTING)) return 10;
+        if (enchantment.value() == Enchantments.MOB_LOOTING) return 10;
         if (enchantment.is(LUNGE_KEY) && isActive(stack, MODE_LUNGE)) return 10;
         return 0;
     }
@@ -147,14 +156,14 @@ public class InfinitySpearItem extends SpearItem implements IUndamageable, InitE
     public Entity createEntity(@NotNull Level level, Entity location, @NotNull ItemStack stack) {
         return ImmortalItemEntity.create(ModEntities.IMMORTAL.get(), level, location.getX(), location.getY(), location.getZ(), stack);
     }
-    private final InitEnchantment initEnchantment = new InitEnchantment(Enchantments.LOOTING, 10);
+    private final InitEnchantment initEnchantment = new InitEnchantment(Enchantments.MOB_LOOTING, 10);
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @NotNull TooltipContext context,
+    public void appendHoverText(@NotNull ItemStack stack, @NotNull Level level,
                                 @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-        this.lootEnchant.appendHoverText(context, tooltipComponents);
+        this.lootEnchant.appendHoverText(level, tooltipComponents);
         if (isActive(stack, MODE_LUNGE)) {
-            this.lungeEnchant.appendHoverText(context, tooltipComponents);
+            this.lungeEnchant.appendHoverText(level, tooltipComponents);
         }
         tooltipComponents.add(Component.translatable("tooltip.avaritia_spear.infinity_spear_damage.desc")
                 .withStyle(ChatFormatting.RED));

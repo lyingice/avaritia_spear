@@ -1,9 +1,9 @@
 package net.avaritia.avaritiaspear.item;
 
-import committee.nova.mods.avaritia.api.common.enchant.InitEnchantment;
+import net.avaritia.avaritiaspear.api.enchant.InitEnchantment;
 import committee.nova.mods.avaritia.api.iface.ITooltip;
-import committee.nova.mods.avaritia.api.iface.item.ISwitchable;
-import committee.nova.mods.avaritia.api.iface.item.InitEnchantItem;
+import net.avaritia.avaritiaspear.api.item.ISwitchable;
+import net.avaritia.avaritiaspear.api.item.InitEnchantItem;
 import committee.nova.mods.avaritia.init.registry.ModDamageTypes;
 import committee.nova.mods.avaritia.init.registry.ModRarities;
 import committee.nova.mods.avaritia.init.registry.ModToolTiers;
@@ -22,7 +22,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -30,11 +34,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -59,24 +60,33 @@ public class BlazeSpearItem extends SpearItem implements ITooltip, InitEnchantIt
     private static final int BURNING_COUNT_RANGE = 8;
     /** 炎爆爆炸半径，与苦力怕一致 */
     private static final float BLAST_RADIUS = 3.0F;
+    /** 攻击距离加成的修饰符 ID：1.20.1 的属性修饰符用 UUID，不用 ResourceLocation */
+    private static final java.util.UUID SPEAR_RANGE_ID =
+            java.util.UUID.fromString("6b1f4d0e-2a3b-4c5d-8e9f-0a1b2c3d4e5f");
+
+    /**
+     * 1.21 是 {@code getDefaultAttributeModifiers(ItemStack)} + {@code ItemAttributeModifiers} builder；
+     * 1.20.1 是 {@code getDefaultAttributeModifiers(EquipmentSlot)} + {@code Multimap}，
+     * 且 {@code Attributes.ENTITY_INTERACTION_RANGE} 在这里叫 {@code ForgeMod.ENTITY_REACH}。
+     */
     @Override
-    public @NotNull ItemAttributeModifiers getDefaultAttributeModifiers(@NotNull ItemStack stack) {
-        return ItemAttributeModifiers.builder()
-                .add(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(BASE_ATTACK_DAMAGE_ID,
-                                ModToolTiers.BLAZE.getAttackDamageBonus(),
-                                AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(BASE_ATTACK_SPEED_ID,
-                                ModToolTiers.BLAZE.getSpeed(),
-                                AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ENTITY_INTERACTION_RANGE,
-                        new AttributeModifier(ResourceLocation.withDefaultNamespace("spear_range"),
-                                2.5, AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .build();
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
+        // 1.20.1 的 super.getDefaultAttributeModifiers 返回的是 ImmutableMultimap，
+        // 直接 put 会抛 UnsupportedOperationException —— 打开创造栏构建搜索树时会走到这里（会崩）。
+        // 必须自己建一个 builder。
+        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+        builder.putAll(super.getDefaultAttributeModifiers(slot));
+        if (slot == EquipmentSlot.MAINHAND) {
+            builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID,
+                    "Weapon modifier", ModToolTiers.BLAZE.getAttackDamageBonus(),
+                    AttributeModifier.Operation.ADDITION));
+            builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID,
+                    "Weapon modifier", ModToolTiers.BLAZE.getSpeed(),
+                    AttributeModifier.Operation.ADDITION));
+            builder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(SPEAR_RANGE_ID,
+                    "Spear range", 2.5, AttributeModifier.Operation.ADDITION));
+        }
+        return builder.build();
     }
     // ==================== 模式切换：shift+右键 ====================
     @Override
@@ -103,7 +113,7 @@ public class BlazeSpearItem extends SpearItem implements ITooltip, InitEnchantIt
             int burningCount = countBurningNearby(player);
             float finalDamage = baseDamage * (1.0F + 0.5F * burningCount);
 
-            DamageSource source = ModDamageTypes.causeRandomDamage(player);
+            DamageSource source = ModDamageTypes.causeRandomDamage(player.level(), player);
             target.invulnerableTime = 0; // 重置无敌帧，防止伤害丢失
             target.hurt(source, finalDamage);
             target.level().playSound(null, target.getX(), target.getY(), target.getZ(),
@@ -150,28 +160,41 @@ public class BlazeSpearItem extends SpearItem implements ITooltip, InitEnchantIt
                               float finalDamage, int burningCount) {
         float explosionRadius = Math.min(6.0F, BLAST_RADIUS * (1.0F + 0.15F * burningCount));
         Vec3 pos = target.position();
-        serverLevel.explode(player, ModDamageTypes.causeRandomDamage(player),
-                new ExplosionDamageCalculator() {
-                    @Override
-                    public float getEntityDamageAmount(Explosion explosion, Entity entity) {
-                        return finalDamage;
-                    }
-                },
-                pos.x, pos.y, pos.z, explosionRadius, false, Level.ExplosionInteraction.MOB);
+        DamageSource source = ModDamageTypes.causeRandomDamage(serverLevel, player);
+
+        // 1.20.1 的 ExplosionDamageCalculator 没有 getEntityDamageAmount（那是 1.20.2+ 的 API），
+        // 没法像 1.21 那样用自定义计算器把爆炸对实体的伤害钉死成"本次攻击伤害"。
+        // 这里改成等价的自己结算：范围内的实体按距离衰减吃 finalDamage，主目标全额。
+        // 副作用（已记录）：不再像原版那样破坏地形/给爆炸击退。
+        serverLevel.sendParticles(ParticleTypes.EXPLOSION_EMITTER, pos.x, pos.y + 0.5, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
+        serverLevel.playSound(null, pos.x, pos.y, pos.z,
+                net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.0F, 1.2F);
+
+        AABB area = new AABB(pos, pos).inflate(explosionRadius);
+        for (Entity entity : serverLevel.getEntities(player, area)) {
+            if (entity == player) continue;
+            double distance = entity.position().distanceTo(pos);
+            float damage = distance <= 0.5D
+                    ? finalDamage
+                    : (float) (finalDamage * Math.max(0.0D, 1.0D - distance / explosionRadius));
+            if (damage > 0.0F) {
+                entity.hurt(source, damage);
+            }
+        }
     }
     public int getInitEnchantLevel(ItemStack stack, Holder<Enchantment> enchantmentHolder) {
-        return enchantmentHolder.is(Enchantments.FIRE_ASPECT) ? 10 : 0;
+        return enchantmentHolder.value() == Enchantments.FIRE_ASPECT ? 10 : 0;
     }
     private final InitEnchantment initEnchantment;
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, Item.@NotNull TooltipContext context,
+    public void appendHoverText(@NotNull ItemStack stack, @NotNull Level level,
                                 @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-        this.initEnchantment.appendHoverText(context, tooltipComponents);
+        this.initEnchantment.appendHoverText(level, tooltipComponents);
         if (isActive(stack, MODE_BLAST)) {
             tooltipComponents.add(Component.translatable("tooltip.avaritia.blaze_spear_blast.active")
                     .withStyle(ChatFormatting.GOLD));
         }
-        super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }
     public boolean hasDescTooltip() {
         return true;

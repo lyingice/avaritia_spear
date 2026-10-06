@@ -1,13 +1,11 @@
 package net.avaritia.avaritiaspear.item;
 
-import committee.nova.mods.avaritia.api.common.enchant.InitEnchantment;
+import net.avaritia.avaritiaspear.api.enchant.InitEnchantment;
 import committee.nova.mods.avaritia.api.iface.ITooltip;
-import committee.nova.mods.avaritia.api.iface.item.ISwitchable;
-import committee.nova.mods.avaritia.api.iface.item.InitEnchantItem;
-import committee.nova.mods.avaritia.init.registry.ModDataComponents;
+import net.avaritia.avaritiaspear.api.item.ISwitchable;
+import net.avaritia.avaritiaspear.api.item.InitEnchantItem;
 import committee.nova.mods.avaritia.init.registry.ModRarities;
 import committee.nova.mods.avaritia.init.registry.ModToolTiers;
-import committee.nova.mods.avaritia.init.registry.modes.ToolMode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,7 +23,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlotGroup;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -34,14 +36,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -56,7 +56,7 @@ public class CrystalSpearItem extends SpearItem implements ITooltip, InitEnchant
                 .durability(8888)
         );
     }
-    private static final ResourceLocation LUNGE_ID = ResourceLocation.fromNamespaceAndPath("spearcore", "lunge");
+    private static final ResourceLocation LUNGE_ID = new ResourceLocation("spearcore", "lunge");
     private static final String MODE_SHATTER = "crystal_shatter";
     /** 每点护甲值增加的伤害倍率 */
     private static final float ARMOR_BONUS = 0.25F;
@@ -75,33 +75,42 @@ public class CrystalSpearItem extends SpearItem implements ITooltip, InitEnchant
         return enchantment.is(ResourceKey.create(Registries.ENCHANTMENT, LUNGE_ID)) ? 3 : 0;
     }
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, Item.@NotNull TooltipContext context,
+    public void appendHoverText(@NotNull ItemStack stack, @NotNull Level level,
                                 @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-        this.lungeEnchant.appendHoverText(context, tooltipComponents);
+        this.lungeEnchant.appendHoverText(level, tooltipComponents);
         if (isActive(stack, MODE_SHATTER)) {
             tooltipComponents.add(Component.translatable("tooltip.avaritia.crystal_shatter.active")
                     .withStyle(ChatFormatting.LIGHT_PURPLE));
         }
-        super.appendHoverText(stack, context, tooltipComponents, isAdvanced);
+        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
     }
+    /** 攻击距离加成的修饰符 ID：1.20.1 的属性修饰符用 UUID，不用 ResourceLocation */
+    private static final java.util.UUID SPEAR_RANGE_ID =
+            java.util.UUID.fromString("6b1f4d0e-2a3b-4c5d-8e9f-0a1b2c3d4e5f");
+
+    /**
+     * 1.21 是 {@code getDefaultAttributeModifiers(ItemStack)} + {@code ItemAttributeModifiers} builder；
+     * 1.20.1 是 {@code getDefaultAttributeModifiers(EquipmentSlot)} + {@code Multimap}，
+     * 且 {@code Attributes.ENTITY_INTERACTION_RANGE} 在这里叫 {@code ForgeMod.ENTITY_REACH}。
+     */
     @Override
-    public @NotNull ItemAttributeModifiers getDefaultAttributeModifiers(@NotNull ItemStack stack) {
-        return ItemAttributeModifiers.builder()
-                .add(Attributes.ATTACK_DAMAGE,
-                        new AttributeModifier(BASE_ATTACK_DAMAGE_ID,
-                                ModToolTiers.CRYSTAL.getAttackDamageBonus(),
-                                AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ATTACK_SPEED,
-                        new AttributeModifier(BASE_ATTACK_SPEED_ID,
-                                ModToolTiers.CRYSTAL.getSpeed(),
-                                AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .add(Attributes.ENTITY_INTERACTION_RANGE,
-                        new AttributeModifier(ResourceLocation.withDefaultNamespace("spear_range"),
-                                4.5, AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.MAINHAND)
-                .build();
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
+        // 1.20.1 的 super.getDefaultAttributeModifiers 返回的是 ImmutableMultimap，
+        // 直接 put 会抛 UnsupportedOperationException —— 打开创造栏构建搜索树时会走到这里（会崩）。
+        // 必须自己建一个 builder。
+        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+        builder.putAll(super.getDefaultAttributeModifiers(slot));
+        if (slot == EquipmentSlot.MAINHAND) {
+            builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID,
+                    "Weapon modifier", ModToolTiers.CRYSTAL.getAttackDamageBonus(),
+                    AttributeModifier.Operation.ADDITION));
+            builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID,
+                    "Weapon modifier", ModToolTiers.CRYSTAL.getSpeed(),
+                    AttributeModifier.Operation.ADDITION));
+            builder.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(SPEAR_RANGE_ID,
+                    "Spear range", 4.5, AttributeModifier.Operation.ADDITION));
+        }
+        return builder.build();
     }
     // ==================== 模式切换：shift+右键 ====================
     @Override

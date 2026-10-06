@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/avaritia_spear.main.iml" filepath="$PROJECT_DIR$/.idea/modules/avaritia_spear.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1138628383/avaritia_spear.spearcore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/1138628383/avaritia_spear.spearcore.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/avaritia_spear-1.20.1-forge.main.iml" filepath="$PROJECT_DIR$/.idea/modules/avaritia_spear-1.20.1-forge.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1201404276/avaritia_spear-1.20.1-forge.spearcore.main.iml" filepath="$PROJECT_DIR$/.idea/modules/-1201404276/avaritia_spear-1.20.1-forge.spearcore.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1201404276/avaritia_spear-1.20.1-forge.spearcore.test.iml" filepath="$PROJECT_DIR$/.idea/modules/-1201404276/avaritia_spear-1.20.1-forge.spearcore.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/avaritia_spear-1.20.1-forge.test.iml" filepath="$PROJECT_DIR$/.idea/modules/avaritia_spear-1.20.1-forge.test.iml" />
     </modules>
   </component>
 </project>

@@ -5,7 +5,9 @@ import committee.nova.mods.avaritia.api.client.model.bakedmodels.WrappedItemMode
 import committee.nova.mods.avaritia.api.client.util.TransformUtils;
 import committee.nova.mods.avaritia.client.model.loader.CosmicBakeModel;
 import net.avaritia.avaritiaspear.item.InfinitySpearItem;
+import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -42,6 +44,9 @@ public abstract class CosmicBakeModelDisplayMixin extends WrappedItemModel {
             MultiBufferSource source,
             int packedLight,
             int packedOverlay,
+            // 1.20.1 的 renderItem 比 1.21 多这两个参数
+            ItemModelShaper modelShaper,
+            TextureManager textureManager,
             CallbackInfo ci
     ) {
         if (stack.getItem() instanceof InfinitySpearItem) {
@@ -57,6 +62,9 @@ public abstract class CosmicBakeModelDisplayMixin extends WrappedItemModel {
             MultiBufferSource source,
             int packedLight,
             int packedOverlay,
+            // 1.20.1 的 renderItem 比 1.21 多这两个参数
+            ItemModelShaper modelShaper,
+            TextureManager textureManager,
             CallbackInfo ci
     ) {
         if (stack.getItem() instanceof InfinitySpearItem) {

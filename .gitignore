@@ -1,4 +1,10 @@
 # 项目排除路径
 /.gradle/
 /build/
-/build/classes/java/main/
+/run/
+/libs/
+/eclipse/
+/bin/
+/.settings/
+.idea/
+*.iml

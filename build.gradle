@@ -1,50 +1,81 @@
 plugins {
     id 'eclipse'
-    id 'net.neoforged.moddev' version '2.0.141'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-version = '1.3'
-base.archivesName = "AvaritiaSpear-1.21.1-neo"
+version = '1.3.1'
+group = 'net.avaritia.avaritiaspear'
+archivesBaseName = 'AvaritiaSpear-1.20.1-forge'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-neoForge {
-    version = "21.1.190"
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+
+    copyIdeResources = true
 
     runs {
         client {
-            client()
-
             def mcreatorJvmOptions = System.getenv('MCREATOR_JVM_OPTIONS')
             if (mcreatorJvmOptions) {
-                mcreatorJvmOptions.split("\\s+").findAll { it.trim() }.each { arg ->
-                    jvmArgument(arg)
-                }
+                jvmArgs += mcreatorJvmOptions.split("\\s+").findAll { it.trim() }.toList()
             }
         }
         server {
-            server()
         }
 
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                avaritia_spear {
+                    source sourceSets.main
+                }
+                // 注：不要用 source project(':spearcore').sourceSets.main 注册隔壁工程，
+                // FML 认不出来（会报 spearcore [MISSING]）。spearcore 走下面的
+                // runtimeOnly fg.deobf(...)，和 Avaritia 一样按普通 mod 加载。
+            }
         }
     }
+}
 
-    mods {
-        mcreator {
-            sourceSet sourceSets.main
-        }
+repositories {
+    // 本地仓库：放 Re-Avaritia 的 1.20.1 构建产物（运行期要用 fg.deobf）
+    maven {
+        name = 'localMods'
+        url = uri('libs/maven')
     }
 }
 
 dependencies {
-    implementation project(':spearcore')
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-}
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    // 前置 spearcore（../spearcore-1.20.1）
+    compileOnly project(':spearcore')
+
+    // 前置 spearcore：编译用隔壁工程源码，运行期用反混淆后的 jar
+    runtimeOnly fg.deobf('net.minecraft.spearcore:spearcore-1.20.1-forge:3.0.0')
+
+    // 前置 Avaritia（Re-Avaritia forge/1.20.1 = 1.4.2）
+    compileOnly files('libs/Re-Avaritia-forge-1.20.1-1.4.2.jar')
+    // 运行期必须用反混淆版：mod jar 里存的是 SRG 名，开发环境是 Mojang 名，
+    // 直接放原版 jar 会 NoSuchMethodError。
+    runtimeOnly fg.deobf('committee.nova.mods:avaritia-1.20.1:1.4.2')
 }
 
-apply from: 'mcreator.gradle'
+mixin {
+    add sourceSets.main, 'mixins.avaritia_spear.refmap.json'
+    config 'avaritia_spear.mixins.json'
+    quiet
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    // 移植期一次性看全所有错误，不要被 javac 的默认 100 条上限截断
+    options.compilerArgs += ['-Xmaxerrs', '1000']
+}
