@@ -2,7 +2,6 @@
 /.gradle/
 /build/
 /run/
-/libs/
 /eclipse/
 /bin/
 /.settings/

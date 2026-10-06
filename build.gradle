@@ -61,10 +61,10 @@ dependencies {
     // 前置 spearcore：编译用隔壁工程源码，运行期用反混淆后的 jar
     runtimeOnly fg.deobf('net.minecraft.spearcore:spearcore-1.20.1-forge:3.0.0')
 
-    // 前置 Avaritia（Re-Avaritia forge/1.20.1 = 1.4.2）
-    compileOnly files('libs/Re-Avaritia-forge-1.20.1-1.4.2.jar')
-    // 运行期必须用反混淆版：mod jar 里存的是 SRG 名，开发环境是 Mojang 名，
-    // 直接放原版 jar 会 NoSuchMethodError。
+    // 前置 Avaritia（Re-Avaritia forge/1.20.1 = 1.4.2，MIT 许可）
+    // 放在 libs/maven 本地仓库里，编译/运行期用同一个坐标；
+    // 运行期必须反混淆（mod jar 里存的是 SRG 名，开发环境是 Mojang 名）。
+    compileOnly 'committee.nova.mods:avaritia-1.20.1:1.4.2'
     runtimeOnly fg.deobf('committee.nova.mods:avaritia-1.20.1:1.4.2')
 }
 
