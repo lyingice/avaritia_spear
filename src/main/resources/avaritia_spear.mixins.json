@@ -5,8 +5,7 @@
   "mixins": [
     "SpearItemLungeMixin",
     "SpearAttackHandlerInfinityMixin",
-    "SpearCollisionInfinityMixin",
-    "SpearItemStabHurtEnemyMixin"
+    "SpearCollisionInfinityMixin"
   ],
   "client": [
     "CosmicBakeModelDisplayMixin",
